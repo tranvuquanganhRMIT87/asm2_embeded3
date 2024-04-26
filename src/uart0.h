@@ -163,3 +163,4 @@ void uart_set_stop_bits(unsigned int stop_bits);
 void uart_set_parity(char parity);
 void uart_enable_cts_rts();
 void uart_disable_cts_rts();
+void custome_gpio_set_function(int pin, int function);

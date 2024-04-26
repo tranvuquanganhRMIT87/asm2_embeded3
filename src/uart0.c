@@ -1,6 +1,13 @@
 #include "uart0.h"
 #include "../mbox/mbox.h"
 
+
+#define GPIO_PIN_CTS 16
+#define GPIO_PIN_RTS 17
+#define GPIO_FUNC_ALT3 0x7
+
+#define GPIO_BASE 0x3F200000 // GPIO controller base address
+
 /**
  * Set baud rate and characteristics (115200 8N1) and map to GPIO
  */
@@ -33,6 +40,11 @@ void uart_init()
 	GPFSEL1 = r;
 
 	/* enable GPIO 14, 15 */
+
+	/* Configure GPIO pins for CTS and RTS */
+    // Assuming GPIO_PIN_CTS and GPIO_PIN_RTS are correctly defined elsewhere in your code
+    custome_gpio_set_function(GPIO_PIN_CTS, GPIO_FUNC_ALT3); // Configure pin for CTS
+    custome_gpio_set_function(GPIO_PIN_RTS, GPIO_FUNC_ALT3); // Configure pin for RTS
 #ifdef RPI3	   // RBP3
 	GPPUD = 0; // No pull up/down control
 	// Toogle clock to flush GPIO setup
@@ -318,4 +330,25 @@ void uart_disable_cts_rts() {
     UART0_CR &= ~(UART0_CR_RTSEN | UART0_CR_CTSEN);
 }
 
+void custome_gpio_set_function(int pin, int function) {
+    volatile unsigned int* gpfsel;
+    unsigned int reg, shift, mask, value;
+
+    // Calculate register and bit positions
+    reg = pin / 10;
+    shift = (pin % 10) * 3;
+    mask = ~(0b111 << shift);
+
+    // Point to the correct GPFSEL register based on the pin number
+    switch (reg) {
+        case 1: gpfsel = GPFSEL1; break;
+        default: return; // Return if no valid register is found (safety)
+    }
+
+    // Set GPIO function
+    value = *gpfsel;           // Read current register value
+    value &= mask;             // Clear current settings at the pin position
+    value |= (function << shift); // Set new function at the pin position
+    *gpfsel = value;           // Write new register value
+}
 
