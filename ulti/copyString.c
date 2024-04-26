@@ -1,4 +1,4 @@
-int copyString(char *source, char* destination){
+int copyString(char *source, char *destination){
 	
 	while(*source != '\0'){
 		*destination = *source;

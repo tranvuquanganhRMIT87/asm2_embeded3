@@ -33,76 +33,7 @@ void uart_send_hex(unsigned int value) {
     uart_puts("\n");
 }
 
-// void showInfo(){
-// 	mBuf[0] = 7*4; // Message Buffer Size in bytes (8 elements * 4 bytes (32 bit) each)
-//     mBuf[1] = MBOX_REQUEST; // Message Request Code (this is a request message)
-    
-//     mBuf[2] = 0x00010002; // TAG Identifier: Get clock rate
-//     mBuf[3] = 4; // Value buffer size in bytes (max of request and response lengths)
-//     mBuf[4] = 0; // REQUEST CODE = 0
-//     mBuf[5] = 0; // clock id: ARM system clock
-//     // mBuf[6] = 0; // clear output buffer (response data are mBuf[5] & mBuf[6])
 
-//     // mBuf[7] = 0x00000001; // TAG Identifier: Get firmware revision
-//     // mBuf[8] = 4; // Value buffer size in bytes (max of request and response lengths)
-//     // mBuf[9] = 0; // REQUEST CODE = 0
-//     // mBuf[10] = 0; // clear output buffer (response data are mBuf[10])
-
-//     // mBuf[11] = 0x00030002; // TAG Identifier: Get clock rate
-//     // mBuf[12] = 8; // Value buffer size in bytes (max of request and response lengths)
-//     // mBuf[13] = 0; // REQUEST CODE = 0
-//     // mBuf[14] = 2; // clock id: UART clock
-//     // mBuf[15] = 0; // clear output buffer (response data are mBuf[14] & mBuf[15])
-
-//     mBuf[6] = MBOX_TAG_LAST;
-
-// 	mBuf[7] = 8 * 4;
-// 	mBuf[8] = MBOX_REQUEST;
-// 	mBuf[9] =  0x00010003;
-// 	mBuf[10] = 6;
-// 	mBuf[11] = 0;
-// 	mBuf[12] = 0;
-// 	mBuf[13] = 0;
-// 	mBuf[14] = MBOX_TAG_LAST;
-    
-//     //Note: Board model and Board serial may give 0 values on QEMU. 
-//     //Board revision, board MAC address: try it yourself, since it is assignment tasks.
-
-//     if (mbox_call(ADDR(mBuf), MBOX_CH_PROP)) {
-//         uart_puts("\nResponse Code for whole message: ");
-//         uart_hex(mBuf[1]);
-
-//         // uart_puts("\n+ Response Code in Message TAG: ");
-//         // uart_hex(mBuf[4]);
-//         // uart_puts("\nDATA: ARM clock rate = ");
-//         // uart_dec(mBuf[6]);
-
-//         uart_puts("\n+ Response Code in Message TAG: ");
-//         uart_hex(mBuf[4]);
-//         uart_puts("\nDATA: firmware revision = ");
-//         uart_hex(mBuf[5]);
-
-//         // uart_puts("\n+ Response Code in Message TAG: ");
-//         // uart_hex(mBuf[13]);
-//         // uart_puts("\nDATA: UART clock rate = ");
-//         // uart_dec(mBuf[15]);
-
-//     } else {
-//         uart_puts("Unable to query!\n");
-//     }
-
-// 	if (mbox_call(ADDR(mBuf), MBOX_CH_PROP)) {
-//         uart_puts("MAC address: ");
-//         for (int i = 0; i < 6; i++) {
-//             uart_hex(((unsigned char*)mBuf)[20+i]); // MAC address starts at byte offset 20
-//             if (i < 5) uart_puts(":");
-//         }
-//         uart_puts("\n");
-// 		// uart_puts(mBuf[8]);
-//     } else {
-//         uart_puts("Unable to query the MAC address!\n");
-//     }
-// };
 #define MBOX_TAG_GET_BOARD_MAC_ADDRESS 0x00010003 // The tag for getting the MAC address
 
 void showInfo() {
@@ -150,6 +81,8 @@ void showInfo() {
     }
 }
 
+
+
 void helpCmdList()
 {
 	uart_puts("Cmd list:\n");
@@ -159,6 +92,11 @@ void helpCmdList()
 	uart_puts("setcolor : set the text color\n");
 	uart_puts("-t <text color> : set the text color\n -b <background color> : set the background color\n");
 	uart_puts("showinfo: show board revision and Mac address\n");
+	uart_puts("configBR <baudrate>: confige custome baudrate\n");
+	uart_puts("setdatabits <databits>: set the number of data bits\n");
+	uart_puts("setstopbits <stopbits>: set the number of stop bits\n");
+	uart_puts("setparity <parity>: set the parity\n");
+	uart_puts("handshaking : enable and disable handshaking\n");
 }
 
 int detailedHelpCmd(char *cmd)
@@ -180,6 +118,24 @@ int detailedHelpCmd(char *cmd)
 	else if (compare2String(cmd, "showinfo") == 0)
 	{
 		uart_puts("showinfo: show board revision and Mac address\n");
+	}
+	else if (compare2String(cmd, "configBR") == 0)
+	{
+		uart_puts("configBR <baudrate>: confige custome baudrate\n");
+	}
+	else if (compare2String(cmd,"setdatabits") == 0)
+	{
+		uart_puts("setdatabits <databits>: set the number of data bits\n");
+	}
+	else if (compare2String(cmd, "setstopbits") == 0)
+	{
+		uart_puts("setstopbits <stopbits>: set the number of stop bits\n");
+	}
+	else if (compare2String(cmd,"setparity") == 0){
+		uart_puts("setparity <parity>: set the parity\n");
+	}
+	else if (compare2String(cmd,"handshaking") == 0){
+		uart_puts("handshaking : enable and disable handshaking\n");
 	}
 	else
 	{
@@ -355,7 +311,36 @@ void cli()
 			copyString("showinfo", &tmp_cmd[tmp_cmdIndex][0]);
 			tmp_cmdIndex++;
 		}
-
+		if (containString(cmd, "configBR") == 1)
+		{
+			copyString("configBR", &tmp_cmd[tmp_cmdIndex][0]);
+			tmp_cmdIndex++;
+		}
+		if (containString(cmd, "check") == 1)
+		{
+			copyString("check", &tmp_cmd[tmp_cmdIndex][0]);
+			tmp_cmdIndex++;
+		}
+		if (containString(cmd, "setdatabits") == 1)
+		{
+			copyString("setdatabits", &tmp_cmd[tmp_cmdIndex][0]);
+			tmp_cmdIndex++;
+		}
+		if (containString(cmd, "setstopbits") == 1)
+		{
+			copyString("setstopbits", &tmp_cmd[tmp_cmdIndex][0]);
+			tmp_cmdIndex++;
+		}
+		if (containString(cmd, "configParity") == 1)
+		{
+			copyString("configParity", &tmp_cmd[tmp_cmdIndex][0]);
+			tmp_cmdIndex++;
+		}
+		if (containString(cmd, "handshaking") == 1)
+		{
+			copyString("handshaking", &tmp_cmd[tmp_cmdIndex][0]);
+			tmp_cmdIndex++;
+		}
 		test = 0;
 	}
 	else if (c == '\b')
@@ -382,8 +367,6 @@ void cli()
 		eraseScreenReverse(cmd);
 		resetString(cmd);
 
-		// Assuming 'cli_history' has a fixed size of 10 entries
-		int history_size = 10;
 
 		// Attempt to find the next non-empty command in the history.
 		int attempts = 0; // To avoid infinite loops in case all entries are empty
@@ -502,6 +485,88 @@ void cli()
 					setColor(&split_cmd[2][0],0);
 					executed++;
 				}
+			}
+		}
+		else if (compare2String(&split_cmd[0][0],"configBR") == 0){
+			if (compare2String(&split_cmd[1][0],"9600") == 0){
+				uart_set_baud_rate(9600);
+			} else if (compare2String(&split_cmd[1][0],"19200") == 0){
+				uart_set_baud_rate(19200);
+			} else if (compare2String(&split_cmd[1][0],"38400") == 0){
+				uart_set_baud_rate(38400);
+			} else if (compare2String(&split_cmd[1][0],"57600") == 0){
+				uart_set_baud_rate(57600);
+			} else if (compare2String(&split_cmd[1][0],"115200") == 0){
+				uart_set_baud_rate(115200);
+			} else {
+				uart_puts("Baudrate not found! Please type 'help' to see the list of commands\n");
+			}
+		}
+		else if (compare2String(&split_cmd[0][0],"check") == 0){
+			uart_puts("oke");
+				 uart_print_baud_rate();
+		}
+		else if (compare2String(&split_cmd[0][0],"setdatabits") == 0){
+			if (compare2String(&split_cmd[1][0],"5") == 0){
+				uart_puts("set databits 5");
+				uart_set_data_bits(5);
+			}
+			else if (compare2String(&split_cmd[1][0],"6") == 0){
+				uart_puts("set databits 6");
+				uart_set_data_bits(6);
+			}
+			else if (compare2String(&split_cmd[1][0],"7") == 0){
+				uart_puts("set databits 7");
+				uart_set_data_bits(7);
+			}
+			else if (compare2String(&split_cmd[1][0],"8") == 0){
+				uart_puts("set databits 8");
+				uart_set_data_bits(8);
+			}
+			else {
+				uart_puts("Databits not found! Please type 'help' to see the list of commands\n");
+			}
+		}
+		else if (compare2String(&split_cmd[0][0],"setstopbits") == 0){
+			if (compare2String(&split_cmd[1][0],"1") == 0){
+				uart_puts("set stopbits 1");
+				uart_set_stop_bits(1);
+			}
+			else if (compare2String(&split_cmd[1][0],"2") == 0){
+				uart_puts("set stopbits 2");
+				uart_set_stop_bits(2);
+			}
+			else {
+				uart_puts("Stopbits not found! Please type 'help' to see the list of commands\n");
+			}
+		}
+		else if (compare2String(&split_cmd[0][0],"configParity") == 0){
+			if (compare2String(&split_cmd[1][0],"even") == 0){
+				uart_puts("set parity even");
+				uart_set_parity('e');
+			}
+			else if (compare2String(&split_cmd[1][0],"odd") == 0){
+				uart_puts("set parity odd");
+				uart_set_parity('o');
+			}
+			else if (compare2String(&split_cmd[1][0],"none") == 0){
+				uart_puts("set parity none");
+				uart_set_parity('n');
+			}
+			else {
+				uart_puts("Parity not found! Please type 'help' to see the list of commands\n");
+			}
+		} else if (compare2String(&split_cmd[0][0],"handshaking") == 0){
+			if (compare2String(&split_cmd[1][0],"enable") == 0){
+				uart_puts("enable handshaking");
+				uart_enable_cts_rts();
+			}
+			else if (compare2String(&split_cmd[1][0],"disable") == 0){
+				uart_puts("disable handshaking");
+				uart_disable_cts_rts();
+			}
+			else {
+				uart_puts("Handshaking not found! Please type 'help' to see the list of commands\n");
 			}
 		}
 		else{
